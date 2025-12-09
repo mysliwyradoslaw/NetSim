@@ -1,41 +1,33 @@
-# Prerequisites
-*.d
-
-# Compiled Object files
-*.slo
-*.lo
+  GNU nano 8.7                         .gitignore                         Modified
 *.o
 *.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Linker files
-*.ilk
-
-# Debugger Files
-*.pdb
-
-# Compiled Dynamic libraries
 *.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
 *.a
-*.lib
-
-# Executables
+*.dll
+*.dylib
 *.exe
 *.out
 *.app
-
-# debug information files
-*.dwo
+build/
+build*/
+bin/
+lib/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+install_manifest.txt
+CTestTestfile.cmake
+.clangd/
+compile_commands.json
+.vscode/ipch/
+.vscode/*.db
+.vscode/*.opendb
+.history/
+*.code-workspace
+.idea/
+cmake-build-*/
+.DS_Store
+*~
+*.swp
+`
