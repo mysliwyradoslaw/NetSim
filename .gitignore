@@ -31,4 +31,4 @@ cmake-build-*/
 *~
 *.swp
 `
-.cache
+.cache/
