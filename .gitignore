@@ -31,5 +31,9 @@ cmake-build-*/
 *~
 *.swp
 `
+<<<<<<< HEAD
 .cache/
 
+=======
+.cache/
+>>>>>>> main
