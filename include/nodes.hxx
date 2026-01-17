@@ -2,9 +2,14 @@
 #define NODES_HPP_
 
 
-#include <memory> 
+#include <helpers.hxx>
+#include <memory>
+#include <map>
+#include <optional>
+
 #include "types.hxx"
 #include "storage_types.hxx"
+#include "package.hxx"
 
 enum class ReceiverType {
     WORKER,
@@ -29,15 +34,25 @@ class Storehouse: public IPackageReceiver, public IPackageStockpile {
 class ReceiverPreferences {
     public:
         ReceiverPreferences(ProbabilityGenerator pg = probability_generator);
+
         using preferences_t = std::map<IPackageReceiver*, double>;
+        using const_iterator = preferences_t::const_iterator;
+
+        const_iterator begin() const { return preferences_.begin(); }
+        const_iterator end()   const { return preferences_.end(); }
+
+        const_iterator cbegin() const { return preferences_.cbegin(); }
+        const_iterator cend()   const { return preferences_.cend(); }
         
         void add_receiver(IPackageReceiver* r);
         void remove_receiver(IPackageReceiver* r);
-        IPackageReceiver* choose_receiver();
+        IPackageReceiver* choose_receiver() const;
 
-        preferences_t& get_preferences() const;
+        const preferences_t& get_preferences() const {return preferences_;}
     private:
+        void normalize_preferences();
         ProbabilityGenerator pg_;
+        preferences_t preferences_;
 };
 
 class PackageSender {
