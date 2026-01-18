@@ -76,7 +76,7 @@ Worker::Worker(ElementID id, TimeOffset pd, std::unique_ptr<IPackageQueue> q) : 
 
 void Worker::do_work(Time t) {
     if (!get_sending_buffer()) {
-        push_package(q_.pop());
+        push_package(q_->pop());
 
         if (pd_ == 1) {
             send_package();
