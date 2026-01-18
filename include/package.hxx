@@ -11,7 +11,7 @@ class Package {
         ElementID id;
 
     public:
-        Package();
+        Package(ElementID ID = 0);
         ~Package();
 };
 

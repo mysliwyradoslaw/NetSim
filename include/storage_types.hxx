@@ -34,4 +34,25 @@ public:
     virtual PackageQueueType get_queue_type() const = 0;
 };
 
+class PackageQueue : public IPackageQueue {
+public:
+    void push(Package&& item) override;
+    bool empty() const override {return queue.empty();};
+    size_type size() const override {return queue.size();};
+
+    const_iterator begin() const override {return queue.begin();};
+    const_iterator end() const override {return queue.end();};
+    const_iterator cbegin() const override {return queue.cbegin();};
+    const_iterator cend() const override {return queue.cend();};
+
+    Package pop() override;
+    PackageQueueType get_queue_type() const override {return queue_type;};
+
+    PackageQueue(PackageQueueType type);
+
+private:
+    std::list<Package> queue;
+    PackageQueueType queue_type;
+};
+
 #endif
