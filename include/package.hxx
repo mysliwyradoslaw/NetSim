@@ -12,7 +12,7 @@ class Package {
 
     public:
         Package();
-        Package(ElementID ID = 0);
+        Package(ElementID id);
         Package(Package&&) = default;
         ~Package();
 
