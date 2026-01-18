@@ -8,11 +8,16 @@ class Package {
     private:
         static std::set<ElementID> assigned_IDs;
         static std::set<ElementID> freed_IDs;
-        ElementID id;
+        ElementID id_;
 
     public:
+        Package();
         Package(ElementID ID = 0);
+        Package(Package&&) = default;
         ~Package();
+
+        Package& operator=(Package&&);
+        ElementID get_id() const {return id_;};
 };
 
 #endif
