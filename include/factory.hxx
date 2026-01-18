@@ -4,7 +4,6 @@
 #include <list>
 #include <map>
 #include "helpers.hxx"
-#include "nodes.hxx"
 
 enum class NodeColor { UNVISITED, VISITED, VERIFIED };
 
@@ -49,14 +48,14 @@ class Factory {
 
     public:
         void add_ramp(Ramp&& ramp) { return container_r_.add(std::move(ramp)); };
-        void remove_ramp(ElementID id) { return container_r_.remove_by_id(id); };
+        void remove_ramp(ElementID id) { remove_receiver(container_r_, id); };
         NodeCollection<Ramp>::iterator find_ramp_by_id(ElementID id) { return container_r_.find_by_id(id); };
         NodeCollection<Ramp>::const_iterator find_ramp_by_id(ElementID id) const { return container_r_.find_by_id(id); };
         NodeCollection<Ramp>::const_iterator ramp_cbegin() const { return container_r_.cbegin(); };
         NodeCollection<Ramp>::const_iterator ramp_cend() const { return container_r_.cend(); };
-        
+
         void add_worker(Worker&& worker) { return container_w_.add(std::move(worker)); };
-        void remove_worker(ElementID id) { return container_w_.remove_by_id(id); };
+        void remove_worker(ElementID id) { remove_receiver(container_w_, id); };
         NodeCollection<Worker>::iterator find_worker_by_id(ElementID id) { return container_w_.find_by_id(id); };
         NodeCollection<Worker>::const_iterator find_worker_by_id(ElementID id) const { return container_w_.find_by_id(id); };
         NodeCollection<Worker>::const_iterator worker_cbegin() const { return container_w_.cbegin(); };
@@ -70,12 +69,20 @@ class Factory {
         NodeCollection<Storehouse>::const_iterator storehouse_cend() const { return container_s_.cend(); };
 
         bool is_consistent();
-        void do_deliveries(Time);
+        void do_deliveries(Time t);
         void do_package_passing();
-        void do_work(Time);
+        void do_work(Time t);
 
     private:
-        void remove_receiver(NodeCollection<Node>& collection, ElementID id);
+        bool has_reachable_storehouse(const PackageSender* sender, std::map<const PackageSender*, NodeColor>& node_colors);
+
+        template <class Node>
+        void remove_receiver(NodeCollection<Node>& collection, ElementID id) {
+            for (auto sender : collection) {
+                sender->receiver_preferences_.remove_receiver(sender);
+            }
+            collection.remove_by_id(id);
+        };
 
         NodeCollection<Ramp> container_r_;
         NodeCollection<Worker> container_w_;
