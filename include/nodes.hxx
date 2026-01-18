@@ -22,6 +22,8 @@ class IPackageReceiver {
         virtual ElementID get_id() const = 0;
         virtual ~IPackageReceiver() = default;
 
+        virtual ReceiverType get_receiver_type() const = 0;
+
         using const_iterator = IPackageStockpile::const_iterator;
 
         virtual const_iterator begin() const = 0;
@@ -37,6 +39,7 @@ class Storehouse: public IPackageReceiver {
 
         void receive_package(Package&& p) override { d_->push(std::move(p)); }
         ElementID get_id() const override { return id_; }
+        ReceiverType get_receiver_type() const override { return ReceiverType::STOREHOUSE; };
 
         const_iterator begin() const override { return d_->begin(); }
         const_iterator end()   const override { return d_->end(); }
@@ -111,6 +114,8 @@ class Worker: public PackageSender, public IPackageReceiver {
 
         ElementID get_id() const override { return id_; }
         void receive_package(Package&& p) override { q_->push(std::move(p)); }
+
+        ReceiverType get_receiver_type() const override { return ReceiverType::WORKER; };
 
         const_iterator begin() const override { return q_->begin(); }
         const_iterator end()   const override { return q_->end(); }
