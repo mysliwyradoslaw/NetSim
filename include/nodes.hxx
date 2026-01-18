@@ -126,3 +126,4 @@ class Worker: public PackageSender, public IPackageReceiver {
 
 
 #endif /* NODES_HPP_ */
+
