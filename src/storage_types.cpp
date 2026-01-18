@@ -11,11 +11,11 @@ Package PackageQueue::pop() {
 
     switch (queue_type) {
         case PackageQueueType::FIFO:
-            pkg = queue.back();
+            pkg = std::move(queue.back());
             queue.pop_back();
 
         case PackageQueueType::LIFO:
-            pkg = queue.front();
+            pkg = std::move(queue.front());
             queue.pop_front();
     }
 
