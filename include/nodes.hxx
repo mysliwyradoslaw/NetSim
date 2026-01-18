@@ -21,14 +21,32 @@ class IPackageReceiver {
         virtual void receive_package(Package&& p) = 0;
         virtual ElementID get_id() const = 0;
         virtual ~IPackageReceiver() = default;
+
+        using const_iterator = IPackageStockpile::const_iterator;
+
+        virtual const_iterator begin() const = 0;
+        virtual const_iterator end()   const = 0;
+
+        virtual const_iterator cbegin() const = 0;
+        virtual const_iterator cend()   const = 0;
 };
 
-class Storehouse: public IPackageReceiver, public IPackageStockpile {
+class Storehouse: public IPackageReceiver {
     public:
-        Storehouse(ElementID id, std::unique_ptr<IPackageReceiver> d);
+        Storehouse(ElementID id, std::unique_ptr<IPackageStockpile> d = std::make_unique<PackageQueue>(PackageQueueType::LIFO));
+
+        void receive_package(Package&& p) override { d_->push(std::move(p)); }
+        ElementID get_id() const override { return id_; }
+
+        const_iterator begin() const override { return d_->begin(); }
+        const_iterator end()   const override { return d_->end(); }
+
+        const_iterator cbegin() const override { return d_->cbegin();}
+        const_iterator cend()   const override { return d_->cend();}
+
     private:
         ElementID id_;
-        std::unique_ptr<IPackageReceiver> d_;
+        std::unique_ptr<IPackageStockpile> d_;
 };
 
 class ReceiverPreferences {
@@ -59,12 +77,14 @@ class PackageSender {
     public:
         PackageSender(PackageSender&&) = default;
         
-        ReceiverPreferences receiver_preferences; //jakas wartosc?
+        ReceiverPreferences receiver_preferences = ReceiverPreferences();
 
         void send_package();
-        std::optional<Package>& get_sending_buffer() const;
+        const std::optional<Package>& get_sending_buffer() const { return sb_; }
     protected:
-        void push_package(Package&&);
+        PackageSender() = default;
+
+        void push_package(Package&& p);
     private:
         std::optional<Package> sb_ = std::nullopt;
 };
@@ -74,24 +94,34 @@ class Ramp: public PackageSender {
         Ramp(ElementID id, TimeOffset di);
 
         void deliver_goods(Time t);
-        TimeOffset get_delivery_interval() const;
-        ElementID get_id() const;
+        TimeOffset get_delivery_interval() const { return di_; }
+        ElementID get_id() const { return id_; }
     private:
         ElementID id_;
         TimeOffset di_;
 };
 
-class Worker: public PackageSender, public IPackageReceiver, public IPackageQueue {
+class Worker: public PackageSender, public IPackageReceiver {
     public:
         Worker(ElementID id, TimeOffset pd, std::unique_ptr<IPackageQueue> q);
 
         void do_work(Time t);
-        TimeOffset get_processing_duration() const;
-        Time get_package_processing_start_time() const;
+        TimeOffset get_processing_duration() const { return pd_; }
+        Time get_package_processing_start_time() const { return processing_start_time_; }
+
+        ElementID get_id() const override { return id_; }
+        void receive_package(Package&& p) override { q_->push(std::move(p)); }
+
+        const_iterator begin() const override { return q_->begin(); }
+        const_iterator end()   const override { return q_->end(); }
+
+        const_iterator cbegin() const override { return q_->cbegin();}
+        const_iterator cend()   const override { return q_->cend();}
     private:
         ElementID id_;
         TimeOffset pd_;
         std::unique_ptr<IPackageQueue> q_;
+        Time processing_start_time_;
 };
 
 
