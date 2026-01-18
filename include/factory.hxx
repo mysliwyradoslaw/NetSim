@@ -51,7 +51,7 @@ class Factory {
 
     public:
         void add_ramp(Ramp&& ramp) { return container_r_.add(std::move(ramp)); };
-        void remove_ramp(ElementID id) { remove_receiver(container_r_, id); };
+        void remove_ramp(ElementID id) { container_r_.remove_by_id(id); };
         NodeCollection<Ramp>::iterator find_ramp_by_id(ElementID id) { return container_r_.find_by_id(id); };
         NodeCollection<Ramp>::const_iterator find_ramp_by_id(ElementID id) const { return container_r_.find_by_id(id); };
         NodeCollection<Ramp>::const_iterator ramp_cbegin() const { return container_r_.cbegin(); };
@@ -65,7 +65,7 @@ class Factory {
         NodeCollection<Worker>::const_iterator worker_cend() const { return container_w_.cend(); };
 
         void add_storehouse(Storehouse&& storehouse) { return container_s_.add(std::move(storehouse)); };
-        void remove_storehouse(ElementID id) { return container_s_.remove_by_id(id); };
+        void remove_storehouse(ElementID id) { remove_receiver(container_w_, id); };
         NodeCollection<Storehouse>::iterator find_storehouse_by_id(ElementID id) { return container_s_.find_by_id(id); };
         NodeCollection<Storehouse>::const_iterator find_storehouse_by_id(ElementID id) const { return container_s_.find_by_id(id); };
         NodeCollection<Storehouse>::const_iterator storehouse_cbegin() const { return container_s_.cbegin(); };
@@ -81,10 +81,16 @@ class Factory {
 
         template <class Node>
         void remove_receiver(NodeCollection<Node>& collection, ElementID id) {
-            // for (auto& sender : collection) {
-            //     sender->receiver_preferences_.remove_receiver(sender);
-            // }
-            // collection.remove_by_id(id);
+            auto receiver = collection.find_by_id(id);
+
+            for (auto& ramp : container_r_) {
+                ramp.receiver_preferences.remove_receiver(receiver);
+            }
+            for (auto& worker : container_w_) {
+                worker.receiver_preferences.remove_receiver(receiver);
+            }
+
+            collection.remove_by_id(id);
         };
 
         NodeCollection<Ramp> container_r_;
