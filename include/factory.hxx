@@ -81,13 +81,14 @@ class Factory {
 
         template <class Node>
         void remove_receiver(NodeCollection<Node>& collection, ElementID id) {
-            auto receiver = collection.find_by_id(id);
+            auto it = collection.find_by_id(id);
+            IPackageReceiver* receiver_ptr = &(*it);
 
             for (auto& ramp : container_r_) {
-                ramp.receiver_preferences.remove_receiver(receiver);
+                ramp.receiver_preferences.remove_receiver(receiver_ptr);
             }
             for (auto& worker : container_w_) {
-                worker.receiver_preferences.remove_receiver(receiver);
+                worker.receiver_preferences.remove_receiver(receiver_ptr);
             }
 
             collection.remove_by_id(id);

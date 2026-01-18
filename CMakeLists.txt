@@ -17,4 +17,6 @@ set(SOURCE_FILES
         src/storage_types.cpp
         )
 
-add_executable(netsim ${SOURCE_FILES} main.cpp)
+add_executable(netsim_products ${SOURCE_FILES} main.cpp)
+
+target_compile_definitions(netsim_products PUBLIC EXERCISE_ID=EXERCISE_ID_PACKAGES)
