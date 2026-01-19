@@ -54,8 +54,8 @@ bool Factory::is_consistent() {
         node_colors[&worker] = NodeColor::UNVISITED;
     }
     try {
-        for (const auto& it = container_r_.cbegin(); it != container_r_.cend(); ++it) {
-            has_reachable_storehouse(*it, node_colors);
+        for (const auto& ramp : container_r_) {
+            has_reachable_storehouse(&ramp, node_colors);
         }
     }
     catch (std::logic_error&) {

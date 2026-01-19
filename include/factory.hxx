@@ -3,7 +3,10 @@
 
 #include <list>
 #include <map>
+#include <algorithm>
+
 #include "helpers.hxx"
+#include "nodes.hxx"
 
 enum class NodeColor { UNVISITED, VISITED, VERIFIED };
 
@@ -12,11 +15,11 @@ class NodeCollection {
 
     // Umieszczenie słowa kluczowego `typename` jest niezbędne aby poinformować
     // kompilator, że `Node` to nazwa typu.
-    using container_t = typename std::list<Node>;
-    using iterator = typename container_t::iterator;
-    using const_iterator = typename container_t::const_iterator;
-
     public:
+        using container_t = typename std::list<Node>;
+        using iterator = typename container_t::iterator;
+        using const_iterator = typename container_t::const_iterator;
+
         void add(Node&& node) { container_.push_back( std::move(node)); };
         void remove_by_id(ElementID id) {
             auto it = find_by_id(id);
@@ -78,17 +81,19 @@ class Factory {
 
         template <class Node>
         void remove_receiver(NodeCollection<Node>& collection, ElementID id) {
-            auto receiver = collection.find_by_id(id);
+            auto it = collection.find_by_id(id);
+            IPackageReceiver* receiver_ptr = dynamic_cast<IPackageReceiver*>(&(*it));
+
 
             for (auto& ramp : container_r_) {
-                ramp.receiver_preferences.remove_receiver(receiver);
+                ramp.receiver_preferences_.remove_receiver(receiver_ptr);
             }
             for (auto& worker : container_w_) {
-                worker.receiver_preferences.remove_receiver(receiver);
+                worker.receiver_preferences_.remove_receiver(receiver_ptr);
             }
 
             collection.remove_by_id(id);
-        };
+        }
 
         NodeCollection<Ramp> container_r_;
         NodeCollection<Worker> container_w_;
