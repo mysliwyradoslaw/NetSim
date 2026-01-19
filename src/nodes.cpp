@@ -75,19 +75,21 @@ void Ramp::deliver_goods(Time t) {
 Worker::Worker(ElementID id, TimeOffset pd, std::unique_ptr<IPackageQueue> q) : id_(id), pd_(pd), q_(std::move(q)) {}
 
 void Worker::do_work(Time t) {
-    if (!get_sending_buffer()) {
-        push_package(q_->pop());
+    if (pd_ == 1) {
+        push_package(std::move(q_->pop()));
+        return;
+    }
 
-        if (pd_ == 1) {
-            send_package();
-            return;
-        }
-
+    if (!processing_buffer_) {
+        processing_buffer_ = std::move(q_->pop());
         processing_start_time_ = t;
         return;
     }
 
-    if ((t - processing_start_time_) % pd_ == 0) { send_package(); }
+    if (t + 1 - processing_start_time_ == pd_) {
+        push_package(std::move(*processing_buffer_));
+        processing_buffer_.reset(); //if sb_ is not empty, this package won't be pushed and will be lost, should never happen
+    }
 }
 
 Storehouse::Storehouse(ElementID id, std::unique_ptr<IPackageStockpile> d) : id_(id), d_(std::move(d)) {}

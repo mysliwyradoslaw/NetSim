@@ -122,6 +122,7 @@ class Worker: public PackageSender, public IPackageReceiver {
         TimeOffset pd_;
         std::unique_ptr<IPackageQueue> q_;
         Time processing_start_time_;
+        std::optional<Package> processing_buffer_ = std::nullopt;
 };
 
 
