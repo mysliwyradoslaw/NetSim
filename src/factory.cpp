@@ -47,11 +47,11 @@ bool Factory::has_reachable_storehouse(const PackageSender* sender, std::map<con
 
 bool Factory::is_consistent() {
     std::map<const PackageSender*, NodeColor> node_colors;
-    for (const auto& it = container_r_.cbegin(); it != container_r_.cend(); ++it) {
-        node_colors[dynamic_cast<PackageSender*>(*it)] = NodeColor::UNVISITED;
+    for (const auto& ramp : container_r_) {
+        node_colors[&ramp] = NodeColor::UNVISITED;
     }
-    for (const auto& it = container_w_.cbegin(); it != container_w_.cend(); ++it) {
-        node_colors[dynamic_cast<PackageSender*>(*it)] = NodeColor::UNVISITED;
+    for (const auto& worker : container_w_) {
+        node_colors[&worker] = NodeColor::UNVISITED;
     }
     try {
         for (const auto& it = container_r_.cbegin(); it != container_r_.cend(); ++it) {
