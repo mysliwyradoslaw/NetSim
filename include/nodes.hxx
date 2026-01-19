@@ -77,7 +77,7 @@ class PackageSender {
     public:
         PackageSender(PackageSender&&) = default;
         
-        ReceiverPreferences receiver_preferences = ReceiverPreferences();
+        ReceiverPreferences receiver_preferences_ = ReceiverPreferences();
 
         void send_package();
         const std::optional<Package>& get_sending_buffer() const { return sb_; }
