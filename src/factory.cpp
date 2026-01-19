@@ -11,7 +11,7 @@ bool Factory::has_reachable_storehouse(const PackageSender* sender, std::map<con
 
     node_colors[sender] = NodeColor::VISITED;
 
-    auto& preferences = sender->receiver_preferences.get_preferences();
+    auto& preferences = sender->receiver_preferences_.get_preferences();
 
     if (preferences.empty()) {
         throw std::logic_error("No reachable storehouses found");
