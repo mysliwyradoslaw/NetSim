@@ -1,7 +1,7 @@
 #include "package.hxx"
 
-static std::set<ElementID> assigned_IDs = {};
-static std::set<ElementID> freed_IDs = {};
+std::set<ElementID> Package::assigned_IDs = {};
+std::set<ElementID> Package::freed_IDs = {};
 
 Package::Package(ElementID ID) {
     if (ID == 0) {
