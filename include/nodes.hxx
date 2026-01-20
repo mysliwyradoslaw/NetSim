@@ -2,7 +2,6 @@
 #define NODES_HPP_
 
 
-#include <helpers.hxx>
 #include <memory>
 #include <map>
 #include <optional>
@@ -10,6 +9,7 @@
 #include "types.hxx"
 #include "storage_types.hxx"
 #include "package.hxx"
+#include "helpers.hxx"
 
 enum class ReceiverType {
     WORKER,
