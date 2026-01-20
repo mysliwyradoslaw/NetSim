@@ -10,13 +10,15 @@ Package PackageQueue::pop() {
     Package pkg;
 
     switch (queue_type) {
-        case PackageQueueType::FIFO:
-            pkg = queue.back();
-            queue.pop_back();
-
         case PackageQueueType::LIFO:
-            pkg = queue.front();
+            pkg = std::move(queue.back());
+            queue.pop_back();
+            break;
+
+        case PackageQueueType::FIFO:
+            pkg = std::move(queue.front());
             queue.pop_front();
+            break;
     }
 
     return pkg;
