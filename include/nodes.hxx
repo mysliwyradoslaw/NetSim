@@ -2,7 +2,6 @@
 #define NODES_HPP_
 
 
-#include <helpers.hxx>
 #include <memory>
 #include <map>
 #include <optional>
@@ -10,6 +9,7 @@
 #include "types.hxx"
 #include "storage_types.hxx"
 #include "package.hxx"
+#include "helpers.hxx"
 
 enum class ReceiverType {
     WORKER,
@@ -80,7 +80,7 @@ class PackageSender {
     public:
         PackageSender(PackageSender&&) = default;
         
-        ReceiverPreferences receiver_preferences = ReceiverPreferences();
+        ReceiverPreferences receiver_preferences_ = ReceiverPreferences();
 
         void send_package();
         const std::optional<Package>& get_sending_buffer() const { return sb_; }
@@ -127,6 +127,7 @@ class Worker: public PackageSender, public IPackageReceiver {
         TimeOffset pd_;
         std::unique_ptr<IPackageQueue> q_;
         Time processing_start_time_;
+        std::optional<Package> processing_buffer_ = std::nullopt;
 };
 
 
