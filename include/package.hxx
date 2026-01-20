@@ -16,7 +16,7 @@ class Package {
         Package(Package&&) = default;
         ~Package();
 
-        Package& operator=(Package&&);
+        Package& operator=(Package&&) = default;
         Package& operator=(const Package&) = delete;
         ElementID get_id() const {return id_;};
 };

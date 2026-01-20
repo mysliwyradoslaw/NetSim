@@ -18,10 +18,10 @@ Package::Package() {
     }
 
     assigned_IDs.insert(id_);
-};
+}
 
 Package::~Package() {
     assigned_IDs.erase(id_);
     freed_IDs.insert(id_);
-};
+}
 
