@@ -65,7 +65,7 @@ class Factory {
         NodeCollection<Worker>::const_iterator worker_cend() const { return container_w_.cend(); };
 
         void add_storehouse(Storehouse&& storehouse) { return container_s_.add(std::move(storehouse)); };
-        void remove_storehouse(ElementID id) { remove_receiver(container_w_, id); };
+        void remove_storehouse(ElementID id) { remove_receiver(container_s_, id); };
         NodeCollection<Storehouse>::iterator find_storehouse_by_id(ElementID id) { return container_s_.find_by_id(id); };
         NodeCollection<Storehouse>::const_iterator find_storehouse_by_id(ElementID id) const { return container_s_.find_by_id(id); };
         NodeCollection<Storehouse>::const_iterator storehouse_cbegin() const { return container_s_.cbegin(); };
@@ -82,17 +82,18 @@ class Factory {
         template <class Node>
         void remove_receiver(NodeCollection<Node>& collection, ElementID id) {
             auto it = collection.find_by_id(id);
-            IPackageReceiver* receiver_ptr = &(*it);
+            IPackageReceiver* receiver_ptr = dynamic_cast<IPackageReceiver*>(&(*it));
+
 
             for (auto& ramp : container_r_) {
-                ramp.receiver_preferences.remove_receiver(receiver_ptr);
+                ramp.receiver_preferences_.remove_receiver(receiver_ptr);
             }
             for (auto& worker : container_w_) {
-                worker.receiver_preferences.remove_receiver(receiver_ptr);
+                worker.receiver_preferences_.remove_receiver(receiver_ptr);
             }
 
             collection.remove_by_id(id);
-        };
+        }
 
         NodeCollection<Ramp> container_r_;
         NodeCollection<Worker> container_w_;
