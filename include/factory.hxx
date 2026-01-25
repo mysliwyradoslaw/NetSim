@@ -4,9 +4,16 @@
 #include <list>
 #include <map>
 #include <algorithm>
+#include <string>
+#include <istream>
+#include <sstream>
+#include <iostream>
+#include <vector>
+
 
 #include "helpers.hxx"
 #include "nodes.hxx"
+
 
 enum class NodeColor { UNVISITED, VISITED, VERIFIED };
 
@@ -100,5 +107,21 @@ class Factory {
         NodeCollection<Storehouse> container_s_;
 
 };
+
+enum class ElementType {
+    RAMP,
+    WORKER,
+    STOREHOUSE,
+    LINK
+};
+
+struct ParsedLineData {
+    ElementType element_type;
+    std::map<std::string, std::string> parameters;
+};
+
+ParsedLineData parse_line(std::string line);
+
+Factory load_factory_structure(std::istream& is);
 
 #endif

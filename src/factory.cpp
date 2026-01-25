@@ -1,5 +1,7 @@
 #include "factory.hxx"
 #include "nodes.hxx"
+#include "storage_types.hxx"
+#include <memory>
 #include <stdexcept>
 
 
@@ -83,6 +85,101 @@ void Factory::do_work(Time t) {
     for (auto& worker : container_w_) {
         worker.do_work(t);
     }
+}
+
+ParsedLineData parse_line(std::string line) {
+
+    ParsedLineData parsed_line_data;
+
+    size_t sep_pos = line.find(' ');
+    std::string ID;
+    
+    if (sep_pos == std::string::npos) {
+        throw std::invalid_argument("Wrong line format");
+    }
+    else {
+        ID = line.substr(0, sep_pos);
+        line.erase(0, sep_pos + 1);
+    }
+
+    if (ID == "LOADING_RAMP") {
+        parsed_line_data.element_type = ElementType::RAMP;
+    }
+    else if (ID == "WORKER") {
+        parsed_line_data.element_type = ElementType::WORKER;
+    }
+    else if (ID == "STOREHOUSE") {
+        parsed_line_data.element_type = ElementType::STOREHOUSE;
+    }
+    else if (ID == "LINK") {
+        parsed_line_data.element_type = ElementType::LINK;
+    }
+    else {
+        throw std::invalid_argument("Wrong ID type: " + ID);
+    }
+
+    std::string param;
+    std::istringstream param_stream(line);
+    char delimiter = ' ';
+
+    while (std::getline(param_stream, param, delimiter)) {
+        sep_pos = param.find('=');
+
+        parsed_line_data.parameters[param.substr(0, sep_pos)]
+            = param.substr(sep_pos + 1, param.size() - sep_pos - 1);
+    }
+
+    return parsed_line_data;
+}
+
+Factory load_factory_structure(std::istream &is) {
+    Factory factory;
+
+    std::string line;
+ 
+    while (std::getline(is, line)) {
+        if (line.empty() || line[0] == ';') continue;
+
+        ParsedLineData parsed_line_data = parse_line(line);
+
+        switch (parsed_line_data.element_type) {
+
+            case ElementType::RAMP:
+                factory.add_ramp(Ramp(std::stoi(parsed_line_data.parameters["id"]), std::stoi(parsed_line_data.parameters["delivery-interval"])));
+                break;
+
+            case ElementType::WORKER: {
+                PackageQueueType q_type;
+
+                if (parsed_line_data.parameters["queue-type"] == "LIFO") {
+                    q_type = PackageQueueType::LIFO;
+                }
+                else if (parsed_line_data.parameters["queue-type"] == "FIFO") {
+                    q_type = PackageQueueType::FIFO;
+                }
+                else {
+                    throw std::invalid_argument("Wrong queue type: ");
+                }
+
+                PackageQueue q = PackageQueue(q_type);
+
+                factory.add_worker(Worker(std::stoi(parsed_line_data.parameters["id"]),
+                    std::stoi(parsed_line_data.parameters["processing-time"]), std::make_unique<PackageQueue>(q)));
+                break;
+            }
+
+            case ElementType::STOREHOUSE:
+                factory.add_storehouse(Storehouse(std::stoi(parsed_line_data.parameters["id"])));
+                break;
+
+            case ElementType::LINK:
+                // add_receiver(IPackageReceiver* r);
+                break;
+        }
+        
+    }
+
+    return factory;
 }
 
 

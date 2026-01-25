@@ -122,6 +122,9 @@ class Worker: public PackageSender, public IPackageReceiver {
 
         const_iterator cbegin() const override { return q_->cbegin();}
         const_iterator cend()   const override { return q_->cend();}
+
+        IPackageQueue* get_queue() const {return &(*q_);}
+        
     private:
         ElementID id_;
         TimeOffset pd_;
