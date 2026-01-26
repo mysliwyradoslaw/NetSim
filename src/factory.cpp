@@ -1,4 +1,5 @@
 #include "factory.hxx"
+#include "helpers.hxx"
 #include "nodes.hxx"
 #include "storage_types.hxx"
 #include <memory>
@@ -142,41 +143,86 @@ Factory load_factory_structure(std::istream &is) {
 
         ParsedLineData parsed_line_data = parse_line(line);
 
-        switch (parsed_line_data.element_type) {
+        try {
 
-            case ElementType::RAMP:
-                factory.add_ramp(Ramp(std::stoi(parsed_line_data.parameters["id"]), std::stoi(parsed_line_data.parameters["delivery-interval"])));
-                break;
+            switch (parsed_line_data.element_type) {
 
-            case ElementType::WORKER: {
-                PackageQueueType q_type;
+                case ElementType::RAMP:
+                    factory.add_ramp(Ramp(std::stoi(parsed_line_data.parameters["id"]), std::stoi(parsed_line_data.parameters["delivery-interval"])));
+                    break;
 
-                if (parsed_line_data.parameters["queue-type"] == "LIFO") {
-                    q_type = PackageQueueType::LIFO;
+                case ElementType::WORKER: {
+                    PackageQueueType q_type;
+
+                    if (parsed_line_data.parameters["queue-type"] == "LIFO") {
+                        q_type = PackageQueueType::LIFO;
+                    }
+                    else if (parsed_line_data.parameters["queue-type"] == "FIFO") {
+                        q_type = PackageQueueType::FIFO;
+                    }
+                    else {
+                        throw std::invalid_argument("Wrong queue type");
+                    }
+
+                    factory.add_worker(Worker(std::stoi(parsed_line_data.parameters["id"]),
+                        std::stoi(parsed_line_data.parameters["processing-time"]), std::make_unique<PackageQueue>(q_type)));
+                    break;
                 }
-                else if (parsed_line_data.parameters["queue-type"] == "FIFO") {
-                    q_type = PackageQueueType::FIFO;
-                }
-                else {
-                    throw std::invalid_argument("Wrong queue type: ");
-                }
 
-                PackageQueue q = PackageQueue(q_type);
+                case ElementType::STOREHOUSE:
+                    factory.add_storehouse(Storehouse(std::stoi(parsed_line_data.parameters["id"])));
+                    break;
 
-                factory.add_worker(Worker(std::stoi(parsed_line_data.parameters["id"]),
-                    std::stoi(parsed_line_data.parameters["processing-time"]), std::make_unique<PackageQueue>(q)));
-                break;
+                case ElementType::LINK:
+                    for (const auto& [param, val] : parsed_line_data.parameters) {
+                        size_t sep_pos = line.find('-');
+
+                        std::string src_type;
+                        ElementID src_id;
+                        std::string dest_type;
+                        ElementID dest_id;
+
+                        if (sep_pos == std::string::npos) {
+                            throw std::invalid_argument("Wrong parameter format");
+                        }
+                        else {
+                            if (param == "src")
+                            {
+                                src_type = val.substr(0, sep_pos);
+                                src_id = std::stoi(val.substr(sep_pos + 1, val.size() - sep_pos - 1));
+                            }
+                            else if (param == "dest") {
+                                dest_type = val.substr(0, sep_pos);
+                                dest_id = std::stoi(val.substr(sep_pos + 1, val.size() - sep_pos - 1));
+                            }
+
+                            ReceiverPreferences rec_prefs;
+
+                            if (src_type == "ramp") {
+                                rec_prefs = factory.find_ramp_by_id(src_id) -> receiver_preferences_;
+                            }
+                            else if (src_type == "worker") {
+                                rec_prefs = factory.find_worker_by_id(src_id) -> receiver_preferences_;
+                            }
+                            
+                            if (dest_type == "store") {
+                                auto rec_it = factory.find_storehouse_by_id(dest_id);
+                                IPackageReceiver* receiver_ptr = dynamic_cast<IPackageReceiver*>(&(*rec_it));
+                                rec_prefs.add_receiver(receiver_ptr);
+                            }
+                            else if (dest_type == "worker") {
+                                auto rec_it = factory.find_worker_by_id(dest_id);
+                                IPackageReceiver* receiver_ptr = dynamic_cast<IPackageReceiver*>(&(*rec_it));
+                                rec_prefs.add_receiver(receiver_ptr);
+                            }
+                        }
+                    }
+                    break;
             }
-
-            case ElementType::STOREHOUSE:
-                factory.add_storehouse(Storehouse(std::stoi(parsed_line_data.parameters["id"])));
-                break;
-
-            case ElementType::LINK:
-                // add_receiver(IPackageReceiver* r);
-                break;
         }
-        
+        catch (int e) {
+            throw e;
+        }
     }
 
     return factory;
